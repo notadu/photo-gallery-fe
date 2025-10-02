@@ -1,22 +1,28 @@
 import { useState } from 'react';
 import { Menu, X, Upload, LogIn } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
   onUploadClick: () => void;
   onLoginClick: () => void;
-  isLoggedIn: boolean;
   onLogout: () => void;
 }
 
-export function Header({ onUploadClick, onLoginClick, isLoggedIn, onLogout }: HeaderProps) {
+export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const {isLoggedIn, logout, user} = useAuth();
+  
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    onLogout()
   };
 
   return (
@@ -43,23 +49,29 @@ export function Header({ onUploadClick, onLoginClick, isLoggedIn, onLogout }: He
             </button>
             
             <div className="flex items-center space-x-2 ml-4">
-              {isLoggedIn ? (
-                <>
+                {isLoggedIn ? (
+                <div className="flex items-center gap-4">
                   <button 
-                    onClick={onUploadClick}
-                    className="btn btn-primary btn-sm flex items-center gap-2"
+                  onClick={onUploadClick}
+                  className="btn btn-primary btn-sm flex items-center gap-2"
                   >
-                    <Upload className="w-4 h-4" />
-                    Upload
+                  <Upload className="w-4 h-4" />
+                  Upload
                   </button>
+                  <div className='flex items-center gap-2'>
+                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-600 font-bold">{user?.name?.charAt(0)}</span>
+                  </div>
                   <button 
-                    onClick={onLogout}
-                    className="btn btn-outline btn-sm"
+                  onClick={handleLogout}
+                  className="btn btn-outline btn-sm"
                   >
-                    Logout
+                  Logout
                   </button>
-                </>
-              ) : (
+                  </div>
+                 
+                </div>
+                ) : (
                 <button 
                   onClick={onLoginClick}
                   className="btn btn-outline btn-sm flex items-center gap-2"
@@ -67,7 +79,7 @@ export function Header({ onUploadClick, onLoginClick, isLoggedIn, onLogout }: He
                   <LogIn className="w-4 h-4" />
                   Login
                 </button>
-              )}
+                )}
             </div>
           </nav>
 

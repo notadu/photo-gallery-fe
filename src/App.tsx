@@ -7,6 +7,7 @@ import { UploadModal } from './components/UploadModal';
 import { LoginModal } from './components/LoginModal';
 import { ToastManager } from './components/Toast';
 import type { PortfolioItemData } from './components/PortfolioItem';
+import { AuthProvider } from './providers/AuthProvider';
 
 // Sample portfolio data
 const sampleItems: PortfolioItemData[] = [
@@ -67,7 +68,6 @@ export default function App() {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItemData[]>(sampleItems);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>>([]);
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -77,25 +77,6 @@ export default function App() {
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
-  const handleLogin = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Demo credentials
-    if (email === 'demo@example.com' && password === 'demo123') {
-      setIsLoggedIn(true);
-      addToast('Successfully logged in!', 'success');
-      return true;
-    }
-    
-    return false;
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    addToast('Successfully logged out!', 'success');
   };
 
   const handleUpload = (newItem: Omit<PortfolioItemData, 'id'>) => {
@@ -109,12 +90,12 @@ export default function App() {
   };
 
   return (
+    <AuthProvider>
     <div className="min-h-screen bg-background overflow-auto">
       <Header
         onUploadClick={() => setIsUploadModalOpen(true)}
         onLoginClick={() => setIsLoginModalOpen(true)}
-        isLoggedIn={isLoggedIn}
-        onLogout={handleLogout}
+        onLogout={() => addToast('Successfully logged out!', 'success')}
       />
       
       <main>
@@ -132,10 +113,11 @@ export default function App() {
       <LoginModal
         open={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
-        onLogin={handleLogin}
+        onSuccess={() => addToast('Successfully logged in!', 'success')}
       />
 
       <ToastManager toasts={toasts} removeToast={removeToast} />
     </div>
+    </AuthProvider>
   );
 }

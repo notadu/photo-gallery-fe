@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onLogin: (email: string, password: string) => Promise<boolean>;
+  onSuccess: () => void;
 }
 
-export function LoginModal({ open, onClose, onLogin }: LoginModalProps) {
+export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const {login} = useAuth();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -40,9 +42,10 @@ export function LoginModal({ open, onClose, onLogin }: LoginModalProps) {
     setIsSubmitting(true);
 
     try {
-      const success = await onLogin(formData.email, formData.password);
-      if (success) {
+      const user = await login(formData.email, formData.password);
+      if (user) {
         setFormData({ email: '', password: '' });
+        onSuccess();
         onClose();
       } else {
         setError('Invalid email or password. Please try again.');
