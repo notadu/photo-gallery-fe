@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useState, useEffect } from "react";
+import { AlertCircle } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 interface LoginModalProps {
   open: boolean;
@@ -10,48 +10,50 @@ interface LoginModalProps {
 
 export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
   const [formData, setFormData] = useState({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const {login} = useAuth();
+  const [error, setError] = useState("");
+  const { login } = useAuth();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isSubmitting) {
-        setError('');
+      if (e.key === "Escape" && !isSubmitting) {
+        setError("");
         onClose();
       }
     };
 
     if (open) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'auto';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "auto";
     };
   }, [open, onClose, isSubmitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
 
     try {
       const user = await login(formData.username, formData.password);
       if (user) {
-        setFormData({ username: '', password: '' });
+        setFormData({ username: "", password: "" });
         onSuccess();
         onClose();
       } else {
-        setError('Invalid email or password. Please try again.');
+        setError("No user data");
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(
+        "Login failed. Please try again. Error: " + JSON.stringify(error),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -59,7 +61,7 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setError('');
+      setError("");
       onClose();
     }
   };
@@ -68,7 +70,10 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
 
   return (
     <div className="dialog-overlay" onClick={handleClose}>
-      <div className="dialog-content max-w-md" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="dialog-content max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="dialog-header">
           <h2 className="dialog-title">Login</h2>
         </div>
@@ -82,12 +87,16 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="block">Username</label>
+            <label htmlFor="email" className="block">
+              Username
+            </label>
             <input
               id="email"
               className="input"
               value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, username: e.target.value }))
+              }
               placeholder="Enter your username..."
               required
               disabled={isSubmitting}
@@ -95,25 +104,29 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block">Password</label>
+            <label htmlFor="password" className="block">
+              Password
+            </label>
             <input
               id="password"
               type="password"
               className="input"
               value={formData.password}
-              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, password: e.target.value }))
+              }
               placeholder="Enter your password..."
               required
               disabled={isSubmitting}
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="btn btn-primary w-full" 
+          <button
+            type="submit"
+            className="btn btn-primary w-full"
             disabled={isSubmitting || !formData.username || !formData.password}
           >
-            {isSubmitting ? 'Logging in...' : 'Login'}
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

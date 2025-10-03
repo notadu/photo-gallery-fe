@@ -1,12 +1,21 @@
-import { useState, type ReactNode } from "react";
-import { AuthService } from "../services/AuthService";
+import { useEffect, useState, type ReactNode } from "react";
+import { authService } from "../services/AuthService";
 import { AuthContext } from "../context/AuthContext";
 import { type User } from "../models/User";
 
-const authService = new AuthService();
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+
+  const initUser = async () => {
+    const result = await authService.getUserInfo();
+    if (result) {
+      setUser(result);
+    }
+  };
+
+  useEffect(() => {
+    initUser();
+  }, []);
 
   const login = async (username: string, password: string) => {
     try {
@@ -23,14 +32,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    authService
-      .logout()
-      .then(() => {
-        setUser(null);
-      })
-      .catch((error) => {
-        console.error("Logout failed:", error);
-      });
+    try {
+      await authService.logout();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
