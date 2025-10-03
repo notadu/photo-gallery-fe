@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.16.0",
+    "@aws-sdk/client-cognito-identity": "^3.901.0",
+    "@aws-sdk/credential-providers": "^3.901.0",
     "@tailwindcss/vite": "^4.1.14",
     "aws-amplify": "^6.15.7",
     "lucide-react": "^0.544.0",

@@ -45,7 +45,7 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
         if (e.target?.result) {
           setFormData((prev) => ({
             ...prev,
-            image: e.target!.result as string,
+            imageUrl: e.target!.result as string,
           }));
         }
       };

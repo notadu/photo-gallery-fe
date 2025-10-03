@@ -1,10 +1,19 @@
 import type { PortfolioItemData } from "../models/PortfolioItemData";
+import type { AuthService } from "./AuthService";
 
 export class DataService {
+  private authService: AuthService | undefined;
+
+  constructor(authService: AuthService) {
+    this.authService = authService;
+  }
+
   public async createPortfolioItem({}: Pick<
     PortfolioItemData,
     "category" | "description" | "imageUrl" | "title" | "location"
   >) {
+    const result = await this.authService?.getTemporaryCredentials();
+    console.log(result);
     return Promise.resolve({
       success: true,
     });

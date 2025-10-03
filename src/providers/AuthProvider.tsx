@@ -17,6 +17,7 @@ export const AuthProvider = ({
     const result = await authService.getUserInfo();
     if (result) {
       setUser(result);
+      await authService.getIdToken();
     }
   };
 

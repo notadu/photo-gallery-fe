@@ -12,7 +12,7 @@ import { AuthService } from "./services/AuthService";
 import { type PortfolioItemData } from "./models/PortfolioItemData";
 
 export const authService = new AuthService();
-export const dataService = new DataService();
+export const dataService = new DataService(authService);
 
 export default function App() {
   const [items, setItems] = useState<PortfolioItemData[]>([]);
