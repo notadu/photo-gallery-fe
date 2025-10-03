@@ -36,13 +36,13 @@ export function Gallery({ items }: { items: PortfolioItemData[] }) {
             className={`btn rounded-full ${filter === "city" ? "btn-primary" : "btn-outline"}`}
             onClick={() => setFilter("city")}
           >
-            Travel
+            City
           </button>
           <button
             className={`btn rounded-full ${filter === "nature" ? "btn-primary" : "btn-outline"}`}
             onClick={() => setFilter("nature")}
           >
-            Handmade
+            Nature
           </button>
         </div>
 

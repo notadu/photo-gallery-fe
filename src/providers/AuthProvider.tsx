@@ -12,30 +12,35 @@ export const AuthProvider = ({
   authService,
 }: PropsWithChildren<AuthProviderProps>) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const initUser = async () => {
-    const result = await authService.getUserInfo();
-    if (result) {
-      setUser(result);
-      await authService.getIdToken();
-    }
+  const init = async () => {
+    const token = await authService.getIdToken();
+    setIsLoggedIn(Boolean(token));
+    const userInfo = await authService.getUserInfo();
+    setUser(userInfo);
   };
 
   useEffect(() => {
-    initUser();
+    init();
   }, []);
 
   const login = async (username: string, password: string) => {
     try {
       const result = await authService.login(username, password);
-      if (result) {
-        setUser(result);
-        return result;
+      if (result.success) {
+        init();
       }
-      return null;
+      return {
+        success: result.success,
+      };
     } catch (error) {
       console.error("Login failed:", error);
-      return null;
+      return {
+        success: false,
+        errorMessage: "Login failed:",
+        error,
+      };
     }
   };
 
@@ -43,6 +48,7 @@ export const AuthProvider = ({
     try {
       await authService.logout();
       setUser(null);
+      setIsLoggedIn(false);
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -51,7 +57,7 @@ export const AuthProvider = ({
   return (
     <AuthContext.Provider
       value={{
-        isLoggedIn: !!user,
+        isLoggedIn,
         user,
         login,
         logout,

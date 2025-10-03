@@ -41,22 +41,15 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
     setError("");
     setIsSubmitting(true);
 
-    try {
-      const user = await login(formData.username, formData.password);
-      if (user) {
-        setFormData({ username: "", password: "" });
-        onSuccess();
-        onClose();
-      } else {
-        setError("No user data");
-      }
-    } catch (err) {
-      setError(
-        "Login failed. Please try again. Error: " + JSON.stringify(error),
-      );
-    } finally {
-      setIsSubmitting(false);
+    const result = await login(formData.username, formData.password);
+    if (result.success) {
+      setFormData({ username: "", password: "" });
+      onSuccess();
+      onClose();
+    } else {
+      setError(result.errorMessage ?? "Login Failed");
     }
+    setIsSubmitting(false);
   };
 
   const handleClose = () => {

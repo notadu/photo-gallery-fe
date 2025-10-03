@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Menu, X, Upload, LogIn } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { Avatar } from './Avatar';
+import { useState } from "react";
+import { Menu, X, Upload, LogIn } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import { Avatar } from "./Avatar";
 
 interface HeaderProps {
   onUploadClick: () => void;
@@ -16,38 +16,45 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
     }
     setIsMobileMenuOpen(false);
   };
 
   const handleLogout = async () => {
     await logout();
-    onLogout()
+    onLogout();
   };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="tracking-tight cursor-pointer" onClick={() => scrollToSection('hero')}>
+          <h1
+            className="tracking-tight cursor-pointer"
+            onClick={() => scrollToSection("hero")}
+          >
             Portfolio
           </h1>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <button
-              onClick={() => scrollToSection('gallery')}
-              className="hover:text-primary transition-colors"
-            >
-              Gallery
-            </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className="hover:text-primary transition-colors"
-            >
-              About
-            </button>
+            {isLoggedIn && (
+              <>
+                <button
+                  onClick={() => scrollToSection("gallery")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Gallery
+                </button>
+                <button
+                  onClick={() => scrollToSection("about")}
+                  className="hover:text-primary transition-colors"
+                >
+                  About
+                </button>
+              </>
+            )}
 
             <div className="flex items-center space-x-2 ml-4">
               {isLoggedIn ? (
@@ -59,7 +66,7 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
                     <Upload className="w-4 h-4" />
                     Upload
                   </button>
-                  <div className='flex items-center gap-2'>
+                  <div className="flex items-center gap-2">
                     <Avatar user={user} />
                     <button
                       onClick={handleLogout}
@@ -68,7 +75,6 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
                       Logout
                     </button>
                   </div>
-
                 </div>
               ) : (
                 <button
@@ -87,7 +93,11 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
 
@@ -96,13 +106,13 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
           <nav className="md:hidden mt-4 pb-4 border-t pt-4">
             <div className="flex flex-col space-y-4">
               <button
-                onClick={() => scrollToSection('gallery')}
+                onClick={() => scrollToSection("gallery")}
                 className="text-left hover:text-primary transition-colors"
               >
                 Gallery
               </button>
               <button
-                onClick={() => scrollToSection('about')}
+                onClick={() => scrollToSection("about")}
                 className="text-left hover:text-primary transition-colors"
               >
                 About
@@ -118,15 +128,15 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
                       <Upload className="w-4 h-4" />
                       Upload
                     </button>
-                  <div className='flex items-center gap-2'>
-                     <Avatar user={user} />
-                     <button
-                      onClick={handleLogout}
-                      className="btn btn-outline btn-sm justify-start"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <Avatar user={user} />
+                      <button
+                        onClick={handleLogout}
+                        className="btn btn-outline btn-sm justify-start"
+                      >
+                        Logout
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <button

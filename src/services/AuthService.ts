@@ -7,6 +7,7 @@ import {
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
 import { Amplify } from "aws-amplify";
+import type { AwsCredentialIdentity } from "@aws-sdk/types";
 
 Amplify.configure({
   Auth: {
@@ -22,27 +23,23 @@ Amplify.configure({
 export class AuthService {
   // private user: SignInOutput | undefined;
   // private userName: string | undefined;
-  private jwtToken: string | undefined;
-  private temporaryCredentials: object | undefined;
+  public jwtToken: string | undefined;
+  private temporaryCredentials: AwsCredentialIdentity | undefined;
 
   public async login(
     username: string,
     password: string,
-  ): Promise<{ name: string; id: string } | null> {
-    const signInResult = await signIn({
-      username,
-      password,
-      options: {
-        authFlowType: "USER_PASSWORD_AUTH",
-      },
-    });
-    if (signInResult.isSignedIn) {
-      const userInfo = await this.getUserInfo();
-      // this.user = signInResult;
-      // this.userName = userInfo?.name;
-      await this.getIdToken();
-      return userInfo;
-    } else {
+  ): Promise<{ success: boolean }> {
+    try {
+      const signInResult = await signIn({
+        username,
+        password,
+        options: {
+          authFlowType: "USER_PASSWORD_AUTH",
+        },
+      });
+      return { success: signInResult.isSignedIn };
+    } catch (error) {
       throw new Error("Something went wrong during login");
     }
   }
@@ -67,7 +64,8 @@ export class AuthService {
 
   public async getIdToken() {
     const authSession = await fetchAuthSession();
-    return authSession.tokens?.idToken?.toString();
+    this.jwtToken = authSession.tokens?.idToken?.toString();
+    return this.jwtToken;
   }
 
   public async getTemporaryCredentials() {

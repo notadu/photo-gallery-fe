@@ -1,19 +1,35 @@
 import { useState, useEffect } from "react";
 import { Upload, X } from "lucide-react";
 import { type PortfolioItemData } from "../models/PortfolioItemData";
+import type { DataService } from "../services/DataService";
 
 interface UploadModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (item: Omit<PortfolioItemData, "id">) => void;
+  dataService: DataService;
+  onSuccess: () => void;
+  onError: (error?: string) => void;
 }
 
-export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
-  const [formData, setFormData] = useState({
+export function UploadModal({
+  open,
+  onClose,
+  onSuccess,
+  onError,
+  dataService,
+}: UploadModalProps) {
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    category: string;
+    file: File | undefined;
+    fileUrl: string;
+  }>({
     title: "",
     description: "",
     category: "" as PortfolioItemData["category"] | "",
-    imageUrl: "",
+    file: undefined,
+    fileUrl: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,18 +54,11 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real app, you'd upload to a file storage service
-      // For demo purposes, we'll use a placeholder URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setFormData((prev) => ({
-            ...prev,
-            imageUrl: e.target!.result as string,
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
+      setFormData((prev) => ({
+        ...prev,
+        file,
+        fileUrl: URL.createObjectURL(file),
+      }));
     }
   };
 
@@ -59,30 +68,36 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
       !formData.title ||
       !formData.description ||
       !formData.category ||
-      !formData.imageUrl
+      !formData.file
     ) {
       return;
     }
 
     setIsSubmitting(true);
 
-    await onSubmit({
+    const result = await dataService.createPortfolioItem({
       title: formData.title,
       description: formData.description,
-      category: formData.category,
-      imageUrl: formData.imageUrl,
+      category: formData.category as PortfolioItemData["category"],
+      file: formData.file,
     });
+    if (result?.success) {
+      // Reset form
+      URL.revokeObjectURL(formData.fileUrl);
+      setFormData({
+        title: "",
+        description: "",
+        category: "",
+        file: undefined,
+        fileUrl: "",
+      });
 
-    // Reset form
-    setFormData({
-      title: "",
-      description: "",
-      category: "" as PortfolioItemData["category"] | "",
-      imageUrl: "",
-    });
-
+      await dataService.fetchItems();
+      onSuccess();
+    } else {
+      onError(result.errorMessage);
+    }
     setIsSubmitting(false);
-    onClose();
   };
 
   const handleClose = () => {
@@ -109,10 +124,10 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
             <label htmlFor="image" className="block">
               Image
             </label>
-            {formData.imageUrl ? (
+            {formData.file ? (
               <div className="relative">
                 <img
-                  src={formData.imageUrl}
+                  src={formData.fileUrl}
                   alt="Preview"
                   className="w-full h-32 object-cover rounded-lg"
                 />
@@ -120,7 +135,7 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
                   type="button"
                   className="btn btn-destructive btn-sm absolute top-2 right-2"
                   onClick={() =>
-                    setFormData((prev) => ({ ...prev, image: null }))
+                    setFormData((prev) => ({ ...prev, file: undefined }))
                   }
                 >
                   <X className="w-4 h-4" />
@@ -209,7 +224,7 @@ export function UploadModal({ open, onClose, onSubmit }: UploadModalProps) {
               !formData.title ||
               !formData.description ||
               !formData.category ||
-              !formData.imageUrl
+              !formData.file
             }
           >
             {isSubmitting ? "Uploading..." : "Upload Item"}

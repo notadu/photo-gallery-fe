@@ -1,35 +1,22 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
-import { Gallery } from "./components/Gallery";
-import { About } from "./components/About";
 import { UploadModal } from "./components/UploadModal";
 import { LoginModal } from "./components/LoginModal";
 import { ToastManager } from "./components/Toast";
 import { AuthProvider } from "./providers/AuthProvider";
 import { DataService } from "./services/DataService";
 import { AuthService } from "./services/AuthService";
-import { type PortfolioItemData } from "./models/PortfolioItemData";
+import { Main } from "./components/Main";
 
 export const authService = new AuthService();
 export const dataService = new DataService(authService);
 
 export default function App() {
-  const [items, setItems] = useState<PortfolioItemData[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; type: "success" | "error" | "info" }>
   >([]);
-
-  const fetchPortfolioItems = async () => {
-    const result = await dataService.fetchItems();
-    setItems(result);
-  };
-
-  useEffect(() => {
-    fetchPortfolioItems();
-  }, []);
 
   const addToast = (
     message: string,
@@ -43,12 +30,9 @@ export default function App() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
-  const handleUpload = async (newItem: Omit<PortfolioItemData, "id">) => {
-    const result = await dataService.createPortfolioItem(newItem);
-    if (result.success) {
-      addToast("Item uploaded successfully!", "success");
-      await fetchPortfolioItems();
-    }
+  const handleUpload = async () => {
+    setIsUploadModalOpen(false);
+    addToast("Item uploaded successfully!", "success");
   };
 
   return (
@@ -60,16 +44,16 @@ export default function App() {
           onLogout={() => addToast("Successfully logged out!", "success")}
         />
 
-        <main>
-          <Hero />
-          <Gallery items={items} />
-          <About />
-        </main>
+        <Main dataService={dataService} />
 
         <UploadModal
+          dataService={dataService}
           open={isUploadModalOpen}
           onClose={() => setIsUploadModalOpen(false)}
-          onSubmit={handleUpload}
+          onSuccess={handleUpload}
+          onError={(error) =>
+            addToast(error ?? "Fail to create portfolio item")
+          }
         />
 
         <LoginModal
