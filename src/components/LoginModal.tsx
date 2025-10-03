@@ -10,7 +10,7 @@ interface LoginModalProps {
 
 export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,9 +42,9 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
     setIsSubmitting(true);
 
     try {
-      const user = await login(formData.email, formData.password);
+      const user = await login(formData.username, formData.password);
       if (user) {
-        setFormData({ email: '', password: '' });
+        setFormData({ username: '', password: '' });
         onSuccess();
         onClose();
       } else {
@@ -82,14 +82,13 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="block">Email</label>
+            <label htmlFor="email" className="block">Username</label>
             <input
               id="email"
-              type="email"
               className="input"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              placeholder="Enter your email..."
+              value={formData.username}
+              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+              placeholder="Enter your username..."
               required
               disabled={isSubmitting}
             />
@@ -109,16 +108,10 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
             />
           </div>
 
-          <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-            <p className="mb-1">Demo credentials:</p>
-            <p>Email: demo@example.com</p>
-            <p>Password: demo123</p>
-          </div>
-
           <button 
             type="submit" 
             className="btn btn-primary w-full" 
-            disabled={isSubmitting || !formData.email || !formData.password}
+            disabled={isSubmitting || !formData.username || !formData.password}
           >
             {isSubmitting ? 'Logging in...' : 'Login'}
           </button>

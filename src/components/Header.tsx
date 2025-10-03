@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Menu, X, Upload, LogIn } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { Avatar } from './Avatar';
 
 interface HeaderProps {
   onUploadClick: () => void;
@@ -10,8 +11,8 @@ interface HeaderProps {
 
 export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const {isLoggedIn, logout, user} = useAuth();
-  
+  const { isLoggedIn, logout, user } = useAuth();
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -35,51 +36,49 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <button 
+            <button
               onClick={() => scrollToSection('gallery')}
               className="hover:text-primary transition-colors"
             >
               Gallery
             </button>
-            <button 
+            <button
               onClick={() => scrollToSection('about')}
               className="hover:text-primary transition-colors"
             >
               About
             </button>
-            
+
             <div className="flex items-center space-x-2 ml-4">
-                {isLoggedIn ? (
+              {isLoggedIn ? (
                 <div className="flex items-center gap-4">
-                  <button 
-                  onClick={onUploadClick}
-                  className="btn btn-primary btn-sm flex items-center gap-2"
+                  <button
+                    onClick={onUploadClick}
+                    className="btn btn-primary btn-sm flex items-center gap-2"
                   >
-                  <Upload className="w-4 h-4" />
-                  Upload
+                    <Upload className="w-4 h-4" />
+                    Upload
                   </button>
                   <div className='flex items-center gap-2'>
-                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-600 font-bold">{user?.name?.charAt(0)}</span>
+                    <Avatar user={user} />
+                    <button
+                      onClick={handleLogout}
+                      className="btn btn-outline btn-sm"
+                    >
+                      Logout
+                    </button>
                   </div>
-                  <button 
-                  onClick={handleLogout}
-                  className="btn btn-outline btn-sm"
-                  >
-                  Logout
-                  </button>
-                  </div>
-                 
+
                 </div>
-                ) : (
-                <button 
+              ) : (
+                <button
                   onClick={onLoginClick}
                   className="btn btn-outline btn-sm flex items-center gap-2"
                 >
                   <LogIn className="w-4 h-4" />
                   Login
                 </button>
-                )}
+              )}
             </div>
           </nav>
 
@@ -96,38 +95,41 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
         {isMobileMenuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t pt-4">
             <div className="flex flex-col space-y-4">
-              <button 
+              <button
                 onClick={() => scrollToSection('gallery')}
                 className="text-left hover:text-primary transition-colors"
               >
                 Gallery
               </button>
-              <button 
+              <button
                 onClick={() => scrollToSection('about')}
                 className="text-left hover:text-primary transition-colors"
               >
                 About
               </button>
-              
+
               <div className="flex flex-col space-y-2 pt-2">
                 {isLoggedIn ? (
                   <>
-                    <button 
+                    <button
                       onClick={onUploadClick}
                       className="btn btn-primary btn-sm flex items-center gap-2 justify-start"
                     >
                       <Upload className="w-4 h-4" />
                       Upload
                     </button>
-                    <button 
-                      onClick={onLogout}
+                  <div className='flex items-center gap-2'>
+                     <Avatar user={user} />
+                     <button
+                      onClick={handleLogout}
                       className="btn btn-outline btn-sm justify-start"
                     >
                       Logout
                     </button>
+                  </div>
                   </>
                 ) : (
-                  <button 
+                  <button
                     onClick={onLoginClick}
                     className="btn btn-outline btn-sm flex items-center gap-2 justify-start"
                   >

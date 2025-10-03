@@ -11,10 +11,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (username: string, password: string) => {
         try {
             const result = await authService.login(username, password);
-            if (result.user) {
-                const user = await authService.getUserInfo();
-                setUser(user); // Replace with actual user data
-                return user;
+            if (result) {
+                setUser(result);
+                return result;
             }
             return null;
         } catch (error) {
