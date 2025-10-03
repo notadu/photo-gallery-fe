@@ -1,4 +1,4 @@
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from "./ImageWithFallback";
 
 export function About() {
   return (
@@ -10,33 +10,36 @@ export function About() {
               <h2 className="mb-6">About Me</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Welcome! I'm passionate about capturing the beauty of the world through 
-                  photography and creating unique handmade pieces that tell stories.
+                  Welcome! I'm passionate about capturing the beauty of the
+                  world through photography and creating unique handmade pieces
+                  that tell stories.
                 </p>
                 <p>
-                  My journey began with a simple camera and a love for exploration. 
-                  Over the years, I've traveled to incredible places, documenting landscapes, 
-                  cultures, and moments that have shaped my perspective.
+                  My journey began with a simple camera and a love for
+                  exploration. Over the years, I've traveled to incredible
+                  places, documenting landscapes, cultures, and moments that
+                  have shaped my perspective.
                 </p>
                 <p>
-                  When I'm not traveling, you'll find me in my studio, crafting handmade 
-                  items with attention to detail and a focus on sustainability. Each piece 
-                  is created with care and designed to bring joy to everyday life.
+                  When I'm not traveling, you'll find me in my studio, crafting
+                  handmade items with attention to detail and a focus on
+                  sustainability. Each piece is created with care and designed
+                  to bring joy to everyday life.
                 </p>
                 <p>
-                  This portfolio is a curated collection of my favorite works - 
-                  both captured and created. I hope they inspire you as much as 
-                  they've inspired me to create them.
+                  This portfolio is a curated collection of my favorite captured
+                  moments. I hope they inspire you as much as they've inspired
+                  me to create them.
                 </p>
               </div>
             </div>
-            
+
             <div className="relative">
-              <div className="relative z-10">
+              <div className="relative z-10 rounded-2xl shadow-lg">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80"
+                  src="/images/placeholder.svg"
                   alt="About me"
-                  className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                  className="w-full h-80 object-none"
                 />
               </div>
               <div className="absolute inset-4 bg-primary/10 rounded-2xl -z-10" />

@@ -1,17 +1,16 @@
-import { useState } from 'react';
-import { PortfolioItem, type PortfolioItemData } from './PortfolioItem';
-import { PortfolioModal } from './PortfolioModal';
+import { useState } from "react";
+import { type PortfolioItemData } from "../models/PortfolioItemData";
+import { PortfolioModal } from "./PortfolioModal";
+import { PortfolioItem } from "./PortfolioItem";
 
-interface GalleryProps {
-  items: PortfolioItemData[];
-}
+export function Gallery({ items }: { items: PortfolioItemData[] }) {
+  const [selectedItem, setSelectedItem] = useState<PortfolioItemData | null>(
+    null,
+  );
+  const [filter, setFilter] = useState<"all" | "city" | "nature">("all");
 
-export function Gallery({ items }: GalleryProps) {
-  const [selectedItem, setSelectedItem] = useState<PortfolioItemData | null>(null);
-  const [filter, setFilter] = useState<'all' | 'travel' | 'handmade'>('all');
-
-  const filteredItems = items.filter(item => 
-    filter === 'all' || item.category === filter
+  const filteredItems = items.filter(
+    (item) => filter === "all" || item.category === filter,
   );
 
   return (
@@ -20,27 +19,28 @@ export function Gallery({ items }: GalleryProps) {
         <div className="text-center mb-12">
           <h2 className="mb-4">Gallery</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            A collection of moments captured through my lens and creations born from my hands.
+            A collection of moments captured through my lens and creations born
+            from my hands.
           </p>
         </div>
 
         {/* Filter Buttons */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           <button
-            className={`btn rounded-full ${filter === 'all' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setFilter('all')}
+            className={`btn rounded-full ${filter === "all" ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setFilter("all")}
           >
             All
           </button>
           <button
-            className={`btn rounded-full ${filter === 'travel' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setFilter('travel')}
+            className={`btn rounded-full ${filter === "city" ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setFilter("city")}
           >
             Travel
           </button>
           <button
-            className={`btn rounded-full ${filter === 'handmade' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setFilter('handmade')}
+            className={`btn rounded-full ${filter === "nature" ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setFilter("nature")}
           >
             Handmade
           </button>
@@ -65,10 +65,9 @@ export function Gallery({ items }: GalleryProps) {
               </div>
               <h3 className="mb-2">No items found</h3>
               <p className="text-muted-foreground">
-                {filter === 'all' 
-                  ? "No portfolio items have been added yet." 
-                  : `No ${filter} items found. Try selecting a different category.`
-                }
+                {filter === "all"
+                  ? "No portfolio items have been added yet."
+                  : `No ${filter} items found. Try selecting a different category.`}
               </p>
             </div>
           </div>

@@ -1,9 +1,16 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { authService } from "../services/AuthService";
+import { useEffect, useState, type PropsWithChildren } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { type User } from "../models/User";
+import type { AuthService } from "../services/AuthService";
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  authService: AuthService;
+}
+
+export const AuthProvider = ({
+  children,
+  authService,
+}: PropsWithChildren<AuthProviderProps>) => {
   const [user, setUser] = useState<User | null>(null);
 
   const initUser = async () => {

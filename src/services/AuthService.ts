@@ -12,7 +12,7 @@ Amplify.configure({
   },
 });
 
-class AuthService {
+export class AuthService {
   // private user: SignInOutput | undefined;
   // private userName: string | undefined;
 
@@ -55,5 +55,3 @@ class AuthService {
     }
   }
 }
-
-export const authService = new AuthService();
