@@ -33,6 +33,7 @@ export function ImageWithFallback(
       style={style}
       {...rest}
       onError={handleError}
+      loading="lazy"
     />
   );
 }

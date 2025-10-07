@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { type PortfolioItemData } from "../models/PortfolioItemData";
+import { type PortfolioItemEntry } from "../models/PortfolioItemData";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { MapPin, Calendar, X } from "lucide-react";
 
 interface PortfolioModalProps {
-  item: PortfolioItemData | null;
+  item: PortfolioItemEntry | null;
   open: boolean;
   onClose: () => void;
 }

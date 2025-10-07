@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { useAppState } from "../hooks/useAppState";
 
 interface ToastProps {
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: "success" | "error" | "info";
   onClose: () => void;
 }
 
@@ -16,13 +17,15 @@ export function Toast({ message, type, onClose }: ToastProps) {
   }, [onClose]);
 
   const typeClasses = {
-    success: 'bg-green-50 text-green-800 border-green-200',
-    error: 'bg-red-50 text-red-800 border-red-200',
-    info: 'bg-blue-50 text-blue-800 border-blue-200'
+    success: "bg-green-50 text-green-800 border-green-200",
+    error: "bg-red-50 text-red-800 border-red-200",
+    info: "bg-blue-50 text-blue-800 border-blue-200",
   };
 
   return (
-    <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg border shadow-lg max-w-sm animate-in fade-in-0 slide-in-from-bottom-2 ${typeClasses[type]}`}>
+    <div
+      className={`fixed bottom-4 right-4 z-50 p-4 rounded-lg border shadow-lg max-w-sm animate-in fade-in-0 slide-in-from-bottom-2 ${typeClasses[type]}`}
+    >
       <div className="flex items-center justify-between">
         <span>{message}</span>
         <button
@@ -36,12 +39,8 @@ export function Toast({ message, type, onClose }: ToastProps) {
   );
 }
 
-interface ToastManagerProps {
-  toasts: Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>;
-  removeToast: (id: string) => void;
-}
-
-export function ToastManager({ toasts, removeToast }: ToastManagerProps) {
+export function ToastManager() {
+  const { toasts, removeToast } = useAppState();
   return (
     <>
       {toasts.map((toast) => (

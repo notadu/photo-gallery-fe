@@ -1,15 +1,30 @@
-import { useState } from "react";
-import { type PortfolioItemData } from "../models/PortfolioItemData";
+import { useEffect, useState } from "react";
+import { type PortfolioItemEntry } from "../models/PortfolioItemData";
 import { PortfolioModal } from "./PortfolioModal";
 import { PortfolioItem } from "./PortfolioItem";
+import { useAppState } from "../hooks/useAppState";
+import { DataService } from "../services/DataService";
+import { useQuery } from "react-query";
 
-export function Gallery({ items }: { items: PortfolioItemData[] }) {
-  const [selectedItem, setSelectedItem] = useState<PortfolioItemData | null>(
+const dataService = DataService.getInstance();
+
+export function Gallery() {
+  const { data, error, isSuccess, isError, isLoading } = useQuery<
+    PortfolioItemEntry[]
+  >("gallery", dataService.fetchItems);
+  const { addToast } = useAppState();
+  const [selectedItem, setSelectedItem] = useState<PortfolioItemEntry | null>(
     null,
   );
   const [filter, setFilter] = useState<"all" | "city" | "nature">("all");
 
-  const filteredItems = items.filter(
+  useEffect(() => {
+    if (isError) {
+      addToast((error as { message: string; stack: string }).message, "error");
+    }
+  }, [isError, error]);
+
+  const filteredItems = data?.filter(
     (item) => filter === "all" || item.category === filter,
   );
 
@@ -47,16 +62,33 @@ export function Gallery({ items }: { items: PortfolioItemData[] }) {
         </div>
 
         {/* Gallery Grid */}
-        {filteredItems.length > 0 ? (
+        {isSuccess ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item) => (
+            {filteredItems?.map((item) => (
               <PortfolioItem
                 key={item.id}
                 item={item}
                 onClick={() => setSelectedItem(item)}
               />
             ))}
+            {!filteredItems?.length && (
+              <div className="text-center py-20">
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <div className="w-8 h-8 rounded bg-muted-foreground/20" />
+                  </div>
+                  <h3 className="mb-2">No items found</h3>
+                  <p className="text-muted-foreground">
+                    {filter === "all"
+                      ? "No portfolio items have been added yet."
+                      : `No ${filter} items found. Try selecting a different category.`}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
+        ) : isLoading ? (
+          <div>Loading...</div>
         ) : (
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
@@ -65,9 +97,7 @@ export function Gallery({ items }: { items: PortfolioItemData[] }) {
               </div>
               <h3 className="mb-2">No items found</h3>
               <p className="text-muted-foreground">
-                {filter === "all"
-                  ? "No portfolio items have been added yet."
-                  : `No ${filter} items found. Try selecting a different category.`}
+                No portfolio items have been added yet.
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-export interface PortfolioItemData {
+export interface PortfolioItemEntry {
   id: string;
   title: string;
   description: string;
@@ -7,3 +7,8 @@ export interface PortfolioItemData {
   date?: string;
   location?: string;
 }
+
+export type PortfolioItemData = Omit<
+  PortfolioItemEntry,
+  "imageUrl" | "date" | "id"
+> & { file: File };

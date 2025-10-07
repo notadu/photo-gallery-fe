@@ -2,16 +2,29 @@ import { useState } from "react";
 import { Menu, X, Upload, LogIn } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Avatar } from "./Avatar";
+import { useAppState } from "../hooks/useAppState";
+import { UploadModal } from "./UploadModal";
+import { LoginModal } from "./LoginModal";
+import { AuthService } from "../services/AuthService";
+import { useMutation, useQueryClient } from "react-query";
 
-interface HeaderProps {
-  onUploadClick: () => void;
-  onLoginClick: () => void;
-  onLogout: () => void;
-}
+const authService = AuthService.getInstance();
 
-export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
+export function Header() {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLoggedIn, logout, user } = useAuth();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => authService.logout(),
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
+
+  const { user, isAuthenticated } = useAuth();
+  const { addToast } = useAppState();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -22,8 +35,14 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
   };
 
   const handleLogout = async () => {
-    await logout();
-    onLogout();
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        addToast("Successfully logged out!", "success");
+      },
+      onError: () => {
+        addToast("Failed to logout", "error");
+      },
+    });
   };
 
   return (
@@ -39,28 +58,24 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            {isLoggedIn && (
-              <>
-                <button
-                  onClick={() => scrollToSection("gallery")}
-                  className="hover:text-primary transition-colors"
-                >
-                  Gallery
-                </button>
-                <button
-                  onClick={() => scrollToSection("about")}
-                  className="hover:text-primary transition-colors"
-                >
-                  About
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => scrollToSection("gallery")}
+              className="hover:text-primary transition-colors"
+            >
+              Gallery
+            </button>
+            <button
+              onClick={() => scrollToSection("about")}
+              className="hover:text-primary transition-colors"
+            >
+              About
+            </button>
 
             <div className="flex items-center space-x-2 ml-4">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <div className="flex items-center gap-4">
                   <button
-                    onClick={onUploadClick}
+                    onClick={() => setIsUploadModalOpen(true)}
                     className="btn btn-primary btn-sm flex items-center gap-2"
                   >
                     <Upload className="w-4 h-4" />
@@ -78,7 +93,7 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
                 </div>
               ) : (
                 <button
-                  onClick={onLoginClick}
+                  onClick={() => setIsLoginModalOpen(true)}
                   className="btn btn-outline btn-sm flex items-center gap-2"
                 >
                   <LogIn className="w-4 h-4" />
@@ -119,10 +134,10 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
               </button>
 
               <div className="flex flex-col space-y-2 pt-2">
-                {isLoggedIn ? (
+                {isAuthenticated ? (
                   <>
                     <button
-                      onClick={onUploadClick}
+                      onClick={() => setIsUploadModalOpen(true)}
                       className="btn btn-primary btn-sm flex items-center gap-2 justify-start"
                     >
                       <Upload className="w-4 h-4" />
@@ -140,7 +155,7 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
                   </>
                 ) : (
                   <button
-                    onClick={onLoginClick}
+                    onClick={() => setIsLoginModalOpen(true)}
                     className="btn btn-outline btn-sm flex items-center gap-2 justify-start"
                   >
                     <LogIn className="w-4 h-4" />
@@ -152,6 +167,14 @@ export function Header({ onUploadClick, onLoginClick, onLogout }: HeaderProps) {
           </nav>
         )}
       </div>
+      <UploadModal
+        open={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+      />
+      <LoginModal
+        open={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </header>
   );
 }

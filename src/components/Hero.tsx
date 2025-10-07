@@ -17,8 +17,8 @@ export function Hero() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
-              alt="Portfolio hero image"
+              src={`https://${import.meta.env.VITE_AWS_ITEMS_BUCKET_NAME}.s3.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/DSC00975.JPG`}
+              alt="Amanita muscaria mushroom"
               className="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-lg"
             />
           </div>

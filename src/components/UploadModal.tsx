@@ -1,23 +1,28 @@
 import { useState, useEffect } from "react";
-import { Upload, X } from "lucide-react";
-import { type PortfolioItemData } from "../models/PortfolioItemData";
-import type { DataService } from "../services/DataService";
+import { AlertCircle, Upload, X } from "lucide-react";
+import {
+  type PortfolioItemData,
+  type PortfolioItemEntry,
+} from "../models/PortfolioItemData";
+import { useAppState } from "../hooks/useAppState";
+import { createPortal } from "react-dom";
+import { DataService } from "../services/DataService";
+import { useMutation, useQueryClient } from "react-query";
 
 interface UploadModalProps {
   open: boolean;
   onClose: () => void;
-  dataService: DataService;
-  onSuccess: () => void;
-  onError: (error?: string) => void;
 }
 
-export function UploadModal({
-  open,
-  onClose,
-  onSuccess,
-  onError,
-  dataService,
-}: UploadModalProps) {
+const dataService = DataService.getInstance();
+
+export function UploadModal({ open, onClose }: UploadModalProps) {
+  const queryClient = useQueryClient();
+  const createItemMutation = useMutation((data: PortfolioItemData) =>
+    dataService.createPortfolioItem(data),
+  );
+
+  const { addToast } = useAppState();
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
@@ -27,16 +32,17 @@ export function UploadModal({
   }>({
     title: "",
     description: "",
-    category: "" as PortfolioItemData["category"] | "",
+    category: "" as PortfolioItemEntry["category"] | "",
     file: undefined,
     fileUrl: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) {
+      if (e.key === "Escape" && !createItemMutation.isLoading) {
         onClose();
+        resetForm();
+        createItemMutation.reset();
       }
     };
 
@@ -49,7 +55,18 @@ export function UploadModal({
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [open, onClose, isSubmitting]);
+  }, [open, onClose, createItemMutation.isLoading]);
+
+  const resetForm = () => {
+    URL.revokeObjectURL(formData.fileUrl);
+    setFormData({
+      title: "",
+      description: "",
+      category: "",
+      file: undefined,
+      fileUrl: "",
+    });
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,51 +81,39 @@ export function UploadModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !formData.title ||
-      !formData.description ||
-      !formData.category ||
-      !formData.file
-    ) {
+    if (!formData.title || !formData.category || !formData.file) {
       return;
     }
 
-    setIsSubmitting(true);
-
-    const result = await dataService.createPortfolioItem({
-      title: formData.title,
-      description: formData.description,
-      category: formData.category as PortfolioItemData["category"],
-      file: formData.file,
-    });
-    if (result?.success) {
-      // Reset form
-      URL.revokeObjectURL(formData.fileUrl);
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        file: undefined,
-        fileUrl: "",
-      });
-
-      await dataService.fetchItems();
-      onSuccess();
-    } else {
-      onError(result.errorMessage);
-    }
-    setIsSubmitting(false);
+    createItemMutation.mutate(
+      {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category as PortfolioItemEntry["category"],
+        file: formData.file,
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          queryClient.invalidateQueries("gallery");
+          addToast("Item uploaded successfully!", "success");
+          onClose();
+        },
+      },
+    );
   };
 
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!createItemMutation.isLoading) {
+      resetForm();
       onClose();
+      createItemMutation.reset();
     }
   };
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleClose}>
       <div
         className="dialog-content max-w-md"
@@ -119,6 +124,14 @@ export function UploadModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {createItemMutation.isError && (
+            <div className="alert alert-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <div>
+                {(createItemMutation.error as { message: string }).message}
+              </div>
+            </div>
+          )}
           {/* Image Upload */}
           <div className="space-y-2">
             <label htmlFor="image" className="block">
@@ -191,7 +204,6 @@ export function UploadModal({
               }
               placeholder="Describe your item..."
               rows={3}
-              required
             />
           </div>
 
@@ -210,8 +222,8 @@ export function UploadModal({
               required
             >
               <option value="">Select category</option>
-              <option value="nature">City</option>
-              <option value="city">Nature</option>
+              <option value="nature">Nature</option>
+              <option value="city">City</option>
             </select>
           </div>
 
@@ -220,17 +232,17 @@ export function UploadModal({
             type="submit"
             className="btn btn-primary w-full"
             disabled={
-              isSubmitting ||
+              createItemMutation.isLoading ||
               !formData.title ||
-              !formData.description ||
               !formData.category ||
               !formData.file
             }
           >
-            {isSubmitting ? "Uploading..." : "Upload Item"}
+            {createItemMutation.isLoading ? "Uploading..." : "Upload Item"}
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.getElementById("overlay")!,
   );
 }

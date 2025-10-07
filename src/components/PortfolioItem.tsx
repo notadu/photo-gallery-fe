@@ -1,8 +1,8 @@
 import { ImageWithFallback } from "./ImageWithFallback";
-import { type PortfolioItemData } from "../models/PortfolioItemData";
+import { type PortfolioItemEntry } from "../models/PortfolioItemData";
 
 interface PortfolioItemProps {
-  item: PortfolioItemData;
+  item: PortfolioItemEntry;
   onClick: () => void;
 }
 

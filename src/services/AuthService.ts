@@ -12,59 +12,50 @@ import type { AwsCredentialIdentity } from "@aws-sdk/types";
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: import.meta.env.VITE_AUTHSTACK_USER_POOL_ID ?? "",
+      userPoolId: import.meta.env.VITE_AWS_AUTHSTACK_USER_POOL_ID ?? "",
       userPoolClientId:
-        import.meta.env.VITE_AUTHSTACK_USER_POOL_CLIENT_ID ?? "",
-      identityPoolId: import.meta.env.VITE_AUTHSTACK_IDENTITY_POOL_ID ?? "",
+        import.meta.env.VITE_AWS_AUTHSTACK_USER_POOL_CLIENT_ID ?? "",
+      identityPoolId: import.meta.env.VITE_AWS_AUTHSTACK_IDENTITY_POOL_ID ?? "",
     },
   },
 });
 
 export class AuthService {
-  // private user: SignInOutput | undefined;
-  // private userName: string | undefined;
-  public jwtToken: string | undefined;
-  private temporaryCredentials: AwsCredentialIdentity | undefined;
+  private static instance: AuthService;
+  public jwtToken: string | null = null;
+  private temporaryCredentials: AwsCredentialIdentity | null = null;
 
-  public async login(
-    username: string,
-    password: string,
-  ): Promise<{ success: boolean }> {
-    try {
-      const signInResult = await signIn({
-        username,
-        password,
-        options: {
-          authFlowType: "USER_PASSWORD_AUTH",
-        },
-      });
-      return { success: signInResult.isSignedIn };
-    } catch (error) {
-      throw new Error("Something went wrong during login");
+  public static getInstance(): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
     }
+    return AuthService.instance;
   }
 
-  public async logout(): Promise<void> {
-    // Simulate an API call to log out the user
-    return await signOut();
+  public async login(username: string, password: string) {
+    const signInResult = await signIn({
+      username,
+      password,
+      options: {
+        authFlowType: "USER_PASSWORD_AUTH",
+      },
+    });
+    return signInResult.isSignedIn;
   }
 
-  public async getUserInfo(): Promise<{
-    name: string;
-    id: string;
-  } | null> {
-    try {
-      const { username, userId } = await getCurrentUser();
-      return { name: username, id: userId };
-    } catch (error) {
-      console.error("Get user info error:", error);
-      return null;
-    }
+  public async logout() {
+    await signOut();
+    this.jwtToken = null;
+    this.temporaryCredentials = null;
+  }
+
+  public async getUserInfo() {
+    return await getCurrentUser();
   }
 
   public async getIdToken() {
     const authSession = await fetchAuthSession();
-    this.jwtToken = authSession.tokens?.idToken?.toString();
+    this.jwtToken = authSession.tokens?.idToken?.toString() ?? null;
     return this.jwtToken;
   }
 
@@ -77,13 +68,13 @@ export class AuthService {
   }
 
   private async generateTemporaryCredentials() {
-    const cognitoIdentityPool = `cognito-idp.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/${import.meta.env.VITE_AUTHSTACK_USER_POOL_ID}`;
+    const cognitoIdentityPool = `cognito-idp.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/${import.meta.env.VITE_AWS_AUTHSTACK_USER_POOL_ID}`;
     const cognitoIdentity = new CognitoIdentityClient({
       credentials: fromCognitoIdentityPool({
         clientConfig: {
           region: import.meta.env.VITE_AWS_REGION,
         },
-        identityPoolId: import.meta.env.VITE_AUTHSTACK_IDENTITY_POOL_ID,
+        identityPoolId: import.meta.env.VITE_AWS_AUTHSTACK_IDENTITY_POOL_ID,
         logins: {
           [cognitoIdentityPool]: this.jwtToken!,
         },

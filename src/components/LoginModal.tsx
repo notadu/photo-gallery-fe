@@ -1,27 +1,39 @@
 import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { createPortal } from "react-dom";
+import { useAppState } from "../hooks/useAppState";
+import { AuthService } from "../services/AuthService";
+import { useMutation, useQueryClient } from "react-query";
 
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
-export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
+const authService = AuthService.getInstance();
+
+export function LoginModal({ open, onClose }: LoginModalProps) {
+  const queryClient = useQueryClient();
+  const loginMutation = useMutation(
+    (params: { username: string; password: string }) =>
+      authService.login(params.username, params.password),
+  );
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const { login } = useAuth();
+  const { addToast } = useAppState();
+
+  const resetForm = () => {
+    setFormData({ username: "", password: "" });
+  };
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) {
-        setError("");
+      if (e.key === "Escape" && !loginMutation.isLoading) {
+        resetForm();
         onClose();
+        loginMutation.reset();
       }
     };
 
@@ -34,34 +46,40 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [open, onClose, isSubmitting]);
+  }, [open, onClose, loginMutation.isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
 
-    const result = await login(formData.username, formData.password);
-    if (result.success) {
-      setFormData({ username: "", password: "" });
-      onSuccess();
-      onClose();
-    } else {
-      setError(result.errorMessage ?? "Login Failed");
-    }
-    setIsSubmitting(false);
+    loginMutation.mutate(
+      {
+        username: formData.username,
+        password: formData.password,
+      },
+      {
+        onSuccess: () => {
+          addToast("Successfully logged in!", "success");
+          resetForm();
+          onClose();
+          loginMutation.reset();
+          queryClient.invalidateQueries({ queryKey: ["session"] });
+          queryClient.invalidateQueries({ queryKey: ["user"] });
+        },
+      },
+    );
   };
 
   const handleClose = () => {
-    if (!isSubmitting) {
-      setError("");
+    if (!loginMutation.isLoading) {
+      resetForm();
       onClose();
+      loginMutation.reset();
     }
   };
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleClose}>
       <div
         className="dialog-content max-w-md"
@@ -72,10 +90,10 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
+          {loginMutation.isError && (
             <div className="alert alert-destructive">
               <AlertCircle className="w-4 h-4" />
-              <div>{error}</div>
+              <div>{(loginMutation.error as { message: string }).message}</div>
             </div>
           )}
 
@@ -92,7 +110,7 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
               }
               placeholder="Enter your username..."
               required
-              disabled={isSubmitting}
+              disabled={loginMutation.isLoading}
             />
           </div>
 
@@ -110,19 +128,24 @@ export function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
               }
               placeholder="Enter your password..."
               required
-              disabled={isSubmitting}
+              disabled={loginMutation.isLoading}
             />
           </div>
 
           <button
             type="submit"
             className="btn btn-primary w-full"
-            disabled={isSubmitting || !formData.username || !formData.password}
+            disabled={
+              loginMutation.isLoading ||
+              !formData.username ||
+              !formData.password
+            }
           >
-            {isSubmitting ? "Logging in..." : "Login"}
+            {loginMutation.isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.getElementById("overlay")!,
   );
 }
