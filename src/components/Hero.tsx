@@ -2,7 +2,7 @@ import { ImageWithFallback } from "./ImageWithFallback";
 
 export function Hero() {
   const scrollToGallery = () => {
-    const element = document.getElementById("gallery");
+    const element = document.getElementById("gallery-preview");
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }

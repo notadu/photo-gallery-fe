@@ -7,6 +7,7 @@ import { UploadModal } from "./UploadModal";
 import { LoginModal } from "./LoginModal";
 import { AuthService } from "../services/AuthService";
 import { useMutation, useQueryClient } from "react-query";
+import { Link, NavLink } from "react-router";
 
 const authService = AuthService.getInstance();
 
@@ -26,14 +27,6 @@ export function Header() {
   const { user, isAuthenticated } = useAuth();
   const { addToast } = useAppState();
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-    setIsMobileMenuOpen(false);
-  };
-
   const handleLogout = async () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
@@ -49,27 +42,28 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1
-            className="tracking-tight cursor-pointer"
-            onClick={() => scrollToSection("hero")}
-          >
+          <Link className="tracking-tight cursor-pointer" to="/">
             Portfolio
-          </h1>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <button
-              onClick={() => scrollToSection("gallery")}
-              className="hover:text-primary transition-colors"
+            <NavLink
+              to="/gallery"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
             >
               Gallery
-            </button>
-            <button
-              onClick={() => scrollToSection("about")}
-              className="hover:text-primary transition-colors"
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
             >
               About
-            </button>
+            </NavLink>
 
             <div className="flex items-center space-x-2 ml-4">
               {isAuthenticated ? (
@@ -120,18 +114,22 @@ export function Header() {
         {isMobileMenuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t pt-4">
             <div className="flex flex-col space-y-4">
-              <button
-                onClick={() => scrollToSection("gallery")}
-                className="text-left hover:text-primary transition-colors"
+              <NavLink
+                to="/gallery"
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? "active" : ""}`
+                }
               >
                 Gallery
-              </button>
-              <button
-                onClick={() => scrollToSection("about")}
-                className="text-left hover:text-primary transition-colors"
+              </NavLink>
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? "active" : ""}`
+                }
               >
                 About
-              </button>
+              </NavLink>
 
               <div className="flex flex-col space-y-2 pt-2">
                 {isAuthenticated ? (

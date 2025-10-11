@@ -117,4 +117,35 @@
   .alert-destructive {
     @apply border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive;
   }
+
+  /* Navigation Link Styles */
+  .nav-link {
+    position: relative;
+    padding-bottom: 0.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .nav-link.active {
+    color: hsl(var(--primary));
+    font-weight: 500;
+  }
+
+  .nav-link.active::after {
+    width: 100%;
+  }
 }
