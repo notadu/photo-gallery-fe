@@ -8,7 +8,7 @@ import { useQuery } from "react-query";
 
 const dataService = DataService.getInstance();
 
-export function Gallery({ preview }: { preview?: boolean }) {
+export const Gallery = ({ preview: _preview }: { preview?: boolean }) => {
   const { data, error, isSuccess, isError, isLoading } = useQuery<
     PortfolioItemEntry[]
   >("gallery", dataService.fetchItems);
@@ -102,4 +102,4 @@ export function Gallery({ preview }: { preview?: boolean }) {
       />
     </>
   );
-}
+};
