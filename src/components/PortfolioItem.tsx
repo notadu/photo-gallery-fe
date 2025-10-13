@@ -16,7 +16,7 @@ export function PortfolioItem({ item, onClick }: PortfolioItemProps) {
         <ImageWithFallback
           src={item.imageUrl}
           alt={item.title}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-64 transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-4 left-4">
           <span

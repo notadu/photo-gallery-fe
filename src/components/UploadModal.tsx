@@ -95,7 +95,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
       {
         onSuccess: () => {
           resetForm();
-          queryClient.invalidateQueries("gallery");
+          queryClient.refetchQueries("gallery");
           addToast("Item uploaded successfully!", "success");
           onClose();
         },

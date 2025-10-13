@@ -19,7 +19,7 @@ export function Hero() {
             <ImageWithFallback
               src={`https://${import.meta.env.VITE_AWS_ITEMS_BUCKET_NAME}.s3.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/DSC00975.JPG`}
               alt="Amanita muscaria mushroom"
-              className="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-lg"
+              className="w-32 h-32 rounded-full mx-auto mb-6 shadow-lg"
             />
           </div>
 
