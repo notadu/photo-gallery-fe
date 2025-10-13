@@ -65,18 +65,22 @@ export class DataService {
       ACL: "public-read",
       Body: file,
       ContentType: file.type,
+      CacheControl: "public, max-age=31536000, immutable",
     });
     const response = await this.s3Client.send(command);
     console.log("Uploaded:", response);
     return `https://${command.input.Bucket}.s3.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/${command.input.Key}`;
   }
 
-  public async fetchItems(): Promise<PortfolioItemEntry[]> {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-    });
+  public async fetchItems(preview?: boolean): Promise<PortfolioItemEntry[]> {
+    const url = new URL(apiUrl);
 
+    if (preview) {
+      url.searchParams.set("limit", "3");
+    }
+
+    const response = await fetch(url, { method: "GET" });
     const result = await response.json();
-    return result;
+    return result?.items;
   }
 }

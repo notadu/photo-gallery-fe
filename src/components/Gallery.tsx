@@ -8,10 +8,10 @@ import { useQuery } from "react-query";
 
 const dataService = DataService.getInstance();
 
-export const Gallery = ({ preview: _preview }: { preview?: boolean }) => {
+export const Gallery = ({ preview }: { preview?: boolean }) => {
   const { data, error, isSuccess, isError, isLoading } = useQuery<
     PortfolioItemEntry[]
-  >("gallery", dataService.fetchItems);
+  >(["gallery", preview], () => dataService.fetchItems(preview));
   const { addToast } = useAppState();
   const [selectedItem, setSelectedItem] = useState<PortfolioItemEntry | null>(
     null,
@@ -53,7 +53,7 @@ export const Gallery = ({ preview: _preview }: { preview?: boolean }) => {
       </div>
 
       {/* Gallery Grid */}
-      {isSuccess ? (
+      {Boolean(isSuccess && filteredItems?.length) && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems?.map((item) => (
             <PortfolioItem
@@ -62,25 +62,10 @@ export const Gallery = ({ preview: _preview }: { preview?: boolean }) => {
               onClick={() => setSelectedItem(item)}
             />
           ))}
-          {!filteredItems?.length && (
-            <div className="text-center py-20">
-              <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <div className="w-8 h-8 rounded bg-muted-foreground/20" />
-                </div>
-                <h3 className="mb-2">No items found</h3>
-                <p className="text-muted-foreground">
-                  {filter === "all"
-                    ? "No portfolio items have been added yet."
-                    : `No ${filter} items found. Try selecting a different category.`}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
-      ) : isLoading ? (
-        <div>Loading...</div>
-      ) : (
+      )}
+      {isLoading && <div>Loading...</div>}
+      {!filteredItems?.length && !isLoading && (
         <div className="text-center py-20">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
