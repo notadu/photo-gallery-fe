@@ -4,36 +4,38 @@ export function ImageWithFallback(
   props: React.ImgHTMLAttributes<HTMLImageElement>,
 ) {
   const [didError, setDidError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const handleError = () => {
-    setDidError(true);
-  };
+  const handleLoad = () => setIsLoaded(true);
+  const handleError = () => setDidError(true);
 
-  const { src, alt, style, className, ...rest } = props;
+  const { src, alt, className = "", style, ...rest } = props;
 
-  return didError ? (
-    <div
-      className={`inline-block bg-gray-100 text-center align-middle ${className ?? ""}`}
-      style={style}
-    >
-      <div className="flex items-center justify-center w-full h-full">
-        <img
-          src="/images/placeholder.svg"
-          alt="Error loading image"
-          {...rest}
-          data-original-url={src}
-        />
-      </div>
-    </div>
-  ) : (
+  const displaySrc = didError ? "/images/placeholder.svg" : src;
+
+  return (
     <img
-      src={src}
+      src={displaySrc}
       alt={alt}
-      className={className}
-      style={style}
-      {...rest}
+      onLoad={handleLoad}
       onError={handleError}
       loading="lazy"
+      {...rest}
+      className={`
+        ${className}
+        transition-opacity duration-700 ease-in-out
+        ${isLoaded ? "opacity-100" : "opacity-0"}
+        bg-gray-200
+        object-cover
+      `}
+      style={{
+        ...style,
+        backgroundImage: didError
+          ? "none"
+          : "linear-gradient(to bottom right, #f3f3f3, #e5e5e5)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     />
   );
 }
