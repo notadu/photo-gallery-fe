@@ -49,7 +49,7 @@ export function PortfolioModal({ item, open, onClose }: PortfolioModalProps) {
             <ImageWithFallback
               src={item.imageUrl}
               alt={item.title}
-              className="w-full h-full min-h-[300px] md:min-h-[500px] object-cover"
+              className="w-full h-full min-h-[300px] md:min-h-[500px]"
             />
             <div className="absolute top-4 left-4">
               <span
