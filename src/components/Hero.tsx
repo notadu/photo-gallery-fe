@@ -35,7 +35,7 @@ export function Hero() {
             onClick={scrollToGallery}
             className="btn btn-primary btn-lg rounded-full px-8"
           >
-            Explore Gallery
+            Explore Featured Works
           </button>
         </div>
       </div>

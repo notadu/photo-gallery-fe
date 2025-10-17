@@ -5,6 +5,7 @@ import { PortfolioItem } from "../components/PortfolioItem";
 import { useAppState } from "../hooks/useAppState";
 import { DataService } from "../services/DataService";
 import { useQuery } from "react-query";
+import { EditModal } from "./EditModal";
 
 const dataService = DataService.getInstance();
 
@@ -17,6 +18,8 @@ export const Gallery = ({ preview }: { preview?: boolean }) => {
     null,
   );
   const [filter, setFilter] = useState<"all" | "city" | "nature">("all");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState<PortfolioItemEntry | null>(null);
 
   useEffect(() => {
     if (isError) {
@@ -27,6 +30,15 @@ export const Gallery = ({ preview }: { preview?: boolean }) => {
   const filteredItems = data?.filter(
     (item) => filter === "all" || item.category === filter,
   );
+
+  const handleDelete = async (_itemId: string) => {
+    // Call delete API
+  };
+
+  const handleEdit = (item: PortfolioItemEntry) => {
+    setItemToEdit(item);
+    setIsEditModalOpen(true);
+  };
 
   return (
     <>
@@ -60,6 +72,9 @@ export const Gallery = ({ preview }: { preview?: boolean }) => {
               key={item.id}
               item={item}
               onClick={() => setSelectedItem(item)}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+              preview={preview}
             />
           ))}
         </div>
@@ -84,6 +99,17 @@ export const Gallery = ({ preview }: { preview?: boolean }) => {
         item={selectedItem}
         open={!!selectedItem}
         onClose={() => setSelectedItem(null)}
+      />
+      <EditModal
+        open={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setItemToEdit(null);
+        }}
+        onSubmit={() => {
+          /* handle */
+        }}
+        item={itemToEdit}
       />
     </>
   );

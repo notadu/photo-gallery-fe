@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { type PortfolioItemEntry } from "../models/PortfolioItemData";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { MapPin, Calendar, X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface PortfolioModalProps {
   item: PortfolioItemEntry | null;
@@ -30,7 +31,7 @@ export function PortfolioModal({ item, open, onClose }: PortfolioModalProps) {
 
   if (!item || !open) return null;
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={onClose}>
       <div
         className="dialog-content max-w-4xl max-h-[90vh] overflow-hidden p-0"
@@ -94,6 +95,7 @@ export function PortfolioModal({ item, open, onClose }: PortfolioModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.getElementById("overlay")!,
   );
 }
