@@ -7,7 +7,7 @@ import {
 import { useAppState } from "../hooks/useAppState";
 import { createPortal } from "react-dom";
 import { DataService } from "../services/DataService";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface UploadModalProps {
   open: boolean;
@@ -18,9 +18,10 @@ const dataService = DataService.getInstance();
 
 export function UploadModal({ open, onClose }: UploadModalProps) {
   const queryClient = useQueryClient();
-  const createItemMutation = useMutation((data: PortfolioItemData) =>
-    dataService.createPortfolioItem(data),
-  );
+  const createItemMutation = useMutation({
+    mutationFn: (data: PortfolioItemData) =>
+      dataService.createPortfolioItem(data),
+  });
 
   const { addToast } = useAppState();
   const [formData, setFormData] = useState<{
@@ -39,7 +40,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !createItemMutation.isLoading) {
+      if (e.key === "Escape" && !createItemMutation.isPending) {
         onClose();
         resetForm();
         createItemMutation.reset();
@@ -55,7 +56,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [open, onClose, createItemMutation.isLoading]);
+  }, [open, onClose, createItemMutation.isPending]);
 
   const resetForm = () => {
     URL.revokeObjectURL(formData.fileUrl);
@@ -95,7 +96,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
       {
         onSuccess: () => {
           resetForm();
-          queryClient.refetchQueries("gallery");
+          queryClient.refetchQueries({ queryKey: ["gallery"] });
           addToast("Item uploaded successfully!", "success");
           onClose();
         },
@@ -104,7 +105,7 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
   };
 
   const handleClose = () => {
-    if (!createItemMutation.isLoading) {
+    if (!createItemMutation.isPending) {
       resetForm();
       onClose();
       createItemMutation.reset();
@@ -232,13 +233,13 @@ export function UploadModal({ open, onClose }: UploadModalProps) {
             type="submit"
             className="btn btn-primary w-full"
             disabled={
-              createItemMutation.isLoading ||
+              createItemMutation.isPending ||
               !formData.title ||
               !formData.category ||
               !formData.file
             }
           >
-            {createItemMutation.isLoading ? "Uploading..." : "Upload Item"}
+            {createItemMutation.isPending ? "Uploading..." : "Upload Item"}
           </button>
         </form>
       </div>
