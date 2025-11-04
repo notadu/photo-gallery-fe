@@ -65,7 +65,7 @@ export class DataService {
       headers: { "Content-Type": file.type },
     });
 
-    return `${import.meta.env.VITE_AWS_CLOUD_FRONT_PHOTOS_URL}/${filename}`;
+    return `${import.meta.env.VITE_AWS_CLOUD_FRONT_PHOTOS_URL}/uploads/${filename}`;
   }
 
   public async fetchItems(preview?: boolean): Promise<PortfolioItemEntry[]> {
