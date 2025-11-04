@@ -6,7 +6,7 @@ import { useAppState } from "../hooks/useAppState";
 import { UploadModal } from "./UploadModal";
 import { LoginModal } from "./LoginModal";
 import { AuthService } from "../services/AuthService";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, NavLink } from "react-router";
 
 const authService = AuthService.getInstance();
@@ -20,7 +20,8 @@ export function Header() {
   const logoutMutation = useMutation({
     mutationFn: async () => authService.logout(),
     onSuccess: () => {
-      queryClient.clear();
+      queryClient.removeQueries({ queryKey: ["session"] });
+      queryClient.removeQueries({ queryKey: ["user"] });
     },
   });
 

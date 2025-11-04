@@ -3,7 +3,7 @@ import { AlertCircle } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useAppState } from "../hooks/useAppState";
 import { AuthService } from "../services/AuthService";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface LoginModalProps {
   open: boolean;
@@ -14,10 +14,10 @@ const authService = AuthService.getInstance();
 
 export function LoginModal({ open, onClose }: LoginModalProps) {
   const queryClient = useQueryClient();
-  const loginMutation = useMutation(
-    (params: { username: string; password: string }) =>
+  const loginMutation = useMutation({
+    mutationFn: (params: { username: string; password: string }) =>
       authService.login(params.username, params.password),
-  );
+  });
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -30,7 +30,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !loginMutation.isLoading) {
+      if (e.key === "Escape" && !loginMutation.isPending) {
         resetForm();
         onClose();
         loginMutation.reset();
@@ -46,7 +46,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [open, onClose, loginMutation.isLoading]);
+  }, [open, onClose, loginMutation.isPending]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +70,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   };
 
   const handleClose = () => {
-    if (!loginMutation.isLoading) {
+    if (!loginMutation.isPending) {
       resetForm();
       onClose();
       loginMutation.reset();
@@ -110,7 +110,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               }
               placeholder="Enter your username..."
               required
-              disabled={loginMutation.isLoading}
+              disabled={loginMutation.isPending}
             />
           </div>
 
@@ -128,7 +128,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               }
               placeholder="Enter your password..."
               required
-              disabled={loginMutation.isLoading}
+              disabled={loginMutation.isPending}
             />
           </div>
 
@@ -136,12 +136,12 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             type="submit"
             className="btn btn-primary w-full"
             disabled={
-              loginMutation.isLoading ||
+              loginMutation.isPending ||
               !formData.username ||
               !formData.password
             }
           >
-            {loginMutation.isLoading ? "Logging in..." : "Login"}
+            {loginMutation.isPending ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AuthService } from "../services/AuthService";
 
 const authService = AuthService.getInstance();

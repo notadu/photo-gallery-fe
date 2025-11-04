@@ -1,16 +1,16 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type {
   PortfolioItemData,
   PortfolioItemEntry,
 } from "../models/PortfolioItemData";
 import { AuthService } from "./AuthService";
 
-const apiUrl = import.meta.env.VITE_AWS_API_URL + "items";
+const apiUrl = import.meta.env.VITE_AWS_API_URL;
+const photosApiUrl = `${apiUrl}/photos`;
+const presignApiUrl = `${apiUrl}/presign`;
 
 export class DataService {
   private static instance: DataService;
   private authService: AuthService;
-  private s3Client: S3Client | undefined;
 
   constructor(authService: AuthService) {
     this.authService = authService;
@@ -31,7 +31,7 @@ export class DataService {
     file,
   }: PortfolioItemData) {
     const imageUrl = await this.uploadFile(file);
-    const response = await fetch(apiUrl, {
+    const response = await fetch(photosApiUrl, {
       method: "POST",
       body: JSON.stringify({
         title,
@@ -49,31 +49,27 @@ export class DataService {
   }
 
   public async uploadFile(file: File) {
-    const credentials = await this.authService?.getTemporaryCredentials();
-    if (!this.s3Client) {
-      this.s3Client = new S3Client({
-        credentials,
-        region: import.meta.env.VITE_AWS_REGION,
-        // TODO: Remove workaround when https://github.com/aws/aws-sdk-js-v3/issues/6834 is fixed.
-        requestChecksumCalculation: "WHEN_REQUIRED",
-      });
-    }
-
-    const command = new PutObjectCommand({
-      Bucket: import.meta.env.VITE_AWS_ITEMS_BUCKET_NAME,
-      Key: file.name.replaceAll(" ", "_"),
-      ACL: "public-read",
-      Body: file,
-      ContentType: file.type,
-      CacheControl: "public, max-age=31536000, immutable",
+    const filename = file.name.replaceAll(" ", "_");
+    const url = new URL(presignApiUrl);
+    url.searchParams.set("filename", filename);
+    const res = await fetch(url, {
+      headers: {
+        Authorization: this.authService.jwtToken!,
+      },
     });
-    const response = await this.s3Client.send(command);
-    console.log("Uploaded:", response);
-    return `https://${command.input.Bucket}.s3.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/${command.input.Key}`;
+    const { url: uploadUrl } = await res.json();
+
+    await fetch(uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type },
+    });
+
+    return `${import.meta.env.VITE_AWS_CLOUD_FRONT_PHOTOS_URL}/uploads/${filename}`;
   }
 
   public async fetchItems(preview?: boolean): Promise<PortfolioItemEntry[]> {
-    const url = new URL(apiUrl);
+    const url = new URL(photosApiUrl);
 
     if (preview) {
       url.searchParams.set("limit", "3");
